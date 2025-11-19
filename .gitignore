@@ -1,0 +1,9 @@
+# Ignore environment variables
+.env
+
+# Ignore Python environment
+__pycache__
+
+# Ignore audio files
+*.mp3
+*.wav

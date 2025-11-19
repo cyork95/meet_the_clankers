@@ -1,0 +1,5 @@
+google-generativeai
+feedparser
+edge-tts
+pydub
+python-dotenv
