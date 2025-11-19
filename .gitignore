@@ -3,6 +3,7 @@
 
 # Ignore Python environment
 __pycache__
+.venv
 
 # Ignore audio files
 *.mp3
