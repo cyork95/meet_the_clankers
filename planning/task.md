@@ -1,19 +1,28 @@
 # Tasks
 
-- [/] Planning and Setup <!-- id: 0 -->
+- [x] Planning and Setup <!-- id: 0 -->
     - [x] Create implementation plan <!-- id: 1 -->
     - [x] Set up project structure (Python environment, dependencies) <!-- id: 2 -->
-- [/] News Fetching Module <!-- id: 3 -->
+- [x] News Fetching Module <!-- id: 3 -->
     - [x] Implement news fetcher (RSS) <!-- id: 4 -->
     - [x] Filter and summarize content <!-- id: 5 -->
-- [/] Script Generation Module <!-- id: 6 -->
+- [x] Script Generation Module <!-- id: 6 -->
     - [x] Create prompts for Zeta and Quill <!-- id: 7 -->
     - [x] Implement script generation logic <!-- id: 8 -->
-- [ ] Audio Generation Module <!-- id: 9 -->
-    - [ ] Implement TTS (EdgeTTS) <!-- id: 10 -->
-    - [ ] Generate audio files <!-- id: 11 -->
-- [ ] Podcast Assembly <!-- id: 12 -->
-    - [ ] Stitch audio segments <!-- id: 13 -->
-    - [ ] Add background music/intro/outro <!-- id: 14 -->
-- [ ] Verification <!-- id: 15 -->
-    - [ ] Run full pipeline test <!-- id: 16 -->
+- [x] Audio Generation Module <!-- id: 9 -->
+    - [x] Implement TTS (EdgeTTS) <!-- id: 10 -->
+    - [x] Generate audio files <!-- id: 11 -->
+- [x] Podcast Assembly <!-- id: 12 -->
+    - [x] Stitch audio segments <!-- id: 13 -->
+    - [x] Add background music/intro/outro <!-- id: 14 -->
+- [x] Quality Assurance <!-- id: 15 -->
+    - [x] Add linting (pylint) <!-- id: 16 -->
+    - [x] Add testing (pytest) <!-- id: 17 -->
+    - [x] Write unit tests for existing modules <!-- id: 18 -->
+- [x] Verification <!-- id: 19 -->
+    - [x] Run full pipeline test <!-- id: 20 -->
+- [ ] Refactoring and Documentation <!-- id: 21 -->
+    - [x] Merge task lists <!-- id: 22 -->
+    - [ ] Create docs folder and move documentation <!-- id: 23 -->
+    - [ ] Create development guide (pylint command) <!-- id: 24 -->
+    - [ ] Create src folder and move code <!-- id: 25 -->

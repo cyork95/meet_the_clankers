@@ -1,7 +1,10 @@
+"""
+Module for generating podcast scripts using Google Gemini API.
+"""
 import os
 import json
-import google.generativeai as genai
 from typing import Dict, List
+import google.generativeai as genai
 
 def generate_script(news_by_category: Dict[str, List[Dict]], mode: str = "daily", holiday_theme: str = None) -> List[Dict[str, str]]:
     """

@@ -1,7 +1,10 @@
-import feedparser
-from datetime import datetime, timedelta
+"""
+Module for fetching news from RSS feeds.
+"""
 import time
+from datetime import datetime, timedelta
 from typing import Dict, List
+import feedparser
 
 # Default RSS Feeds
 RSS_FEEDS = {

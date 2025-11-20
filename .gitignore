@@ -3,8 +3,11 @@
 
 # Ignore Python environment
 __pycache__
+.pytest_cache
 .venv
 
 # Ignore audio files
 *.mp3
 *.wav
+temp_audio/
+output/
