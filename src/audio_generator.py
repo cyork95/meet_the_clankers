@@ -1,29 +1,89 @@
 """
-Module for generating audio from text using EdgeTTS.
+Module for generating audio from text using Google Cloud Text-to-Speech.
 """
 import asyncio
 import os
+import subprocess
 from typing import List, Dict
-import edge_tts
+from google.cloud import texttospeech
 
-# Voice Configuration
+# Voice Configuration - Using Google Cloud WaveNet voices
 VOICES = {
-    "Zeta": "en-US-AriaNeural",  # Energetic Female
-    "Quill": "en-US-GuyNeural"   # Calm/Sarcastic Male
+    "Zeta": {
+        "language_code": "en-US",
+        "name": "en-US-Neural2-F",  # High-quality female voice
+        "pitch": 2.0,  # Slightly higher pitch for energetic feel
+        "speaking_rate": 1.1  # Slightly faster for enthusiasm
+    },
+    "Quill": {
+        "language_code": "en-US",
+        "name": "en-US-Neural2-D",  # High-quality male voice
+        "pitch": -2.0,  # Slightly lower pitch for gravitas
+        "speaking_rate": 0.95  # Slightly slower for measured delivery
+    }
 }
 
 async def generate_audio_for_line(text: str, speaker: str, index: int, output_dir: str) -> str:
     """
-    Generate audio for a single line of dialogue.
+    Generate audio for a single line of dialogue using Google Cloud TTS.
+    Falls back to gTTS if Google Cloud TTS fails.
     """
-    voice = VOICES.get(speaker, "en-US-AriaNeural") # Default to Zeta
     output_file = os.path.join(output_dir, f"{index:03d}_{speaker}.mp3")
     
-    communicate = edge_tts.Communicate(text, voice)
-    await communicate.save(output_file)
+    # Try Google Cloud TTS first
+    try:
+        def run_google_tts():
+            client = texttospeech.TextToSpeechClient()
+            
+            # Get voice config for speaker
+            voice_config = VOICES.get(speaker, VOICES["Zeta"])
+            
+            # Set up the synthesis input
+            synthesis_input = texttospeech.SynthesisInput(text=text)
+            
+            # Configure voice parameters
+            voice = texttospeech.VoiceSelectionParams(
+                language_code=voice_config["language_code"],
+                name=voice_config["name"]
+            )
+            
+            # Configure audio settings
+            audio_config = texttospeech.AudioConfig(
+                audio_encoding=texttospeech.AudioEncoding.MP3,
+                pitch=voice_config["pitch"],
+                speaking_rate=voice_config["speaking_rate"]
+            )
+            
+            # Perform the text-to-speech request
+            response = client.synthesize_speech(
+                input=synthesis_input,
+                voice=voice,
+                audio_config=audio_config
+            )
+            
+            # Write the response to the output file
+            with open(output_file, "wb") as out:
+                out.write(response.audio_content)
+        
+        await asyncio.to_thread(run_google_tts)
+        
+    except Exception as e:
+        print(f"⚠️ Google Cloud TTS failed for line {index}: {e}. Falling back to gTTS.")
+        try:
+            from gtts import gTTS
+            # Run gTTS in a separate thread to avoid blocking the event loop
+            def run_gtts():
+                tts = gTTS(text=text, lang='en')
+                tts.save(output_file)
+            
+            await asyncio.to_thread(run_gtts)
+        except Exception as gtts_e:
+            print(f"❌ gTTS also failed: {gtts_e}")
+            return ""
+
     return output_file
 
-async def generate_audio_files(script: List[Dict[str, str]], output_dir: str = "temp_audio") -> List[str]:
+async def generate_audio_files(script: List[Dict[str, str]], output_dir: str = "outputs/temp_audio") -> List[str]:
     """
     Generate audio files for the entire script.
     """

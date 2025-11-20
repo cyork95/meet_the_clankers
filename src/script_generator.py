@@ -3,21 +3,48 @@ Module for generating podcast scripts using Google Gemini API.
 """
 import os
 import json
-from typing import Dict, List
+from typing import Dict, List, Tuple
 import google.generativeai as genai
 
-def generate_script(news_by_category: Dict[str, List[Dict]], mode: str = "daily", holiday_theme: str = None) -> List[Dict[str, str]]:
+def generate_title(script: List[Dict[str, str]], model) -> str:
+    """
+    Generate a short, catchy title for the podcast episode based on the script.
+    """
+    # Extract first few exchanges for context
+    context = " ".join([line.get("text", "")[:100] for line in script[:5]])
+    
+    prompt = f"""Based on this podcast script excerpt, generate a SHORT, CATCHY title (3-5 words max) for this episode.
+    The title should be filename-safe (no special characters except hyphens and underscores).
+    Return ONLY the title, nothing else.
+    
+    Script excerpt: {context}
+    """
+    
+    try:
+        response = model.generate_content(prompt)
+        title = response.text.strip()
+        # Clean up title for filename safety
+        title = title.replace('"', '').replace("'", "").replace(':', '').replace('/', '-')
+        title = title.replace('\\', '-').replace('|', '-').replace('?', '').replace('*', '')
+        title = title.replace('<', '').replace('>', '').replace('.', '')
+        title = '_'.join(title.split())  # Replace spaces with underscores
+        return title[:50]  # Limit length
+    except Exception as e:
+        print(f"⚠️ Title generation failed: {e}. Using default.")
+        return "Daily_Tech_Roundup"
+
+def generate_script(news_by_category: Dict[str, List[Dict]], mode: str = "daily", holiday_theme: str = None) -> Tuple[List[Dict[str, str]], str]:
     """
     Generate a podcast script using Gemini based on the provided news.
     """
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         print("❌ GEMINI_API_KEY not found. Please set it in .env")
-        return []
+        return [], "Error_No_API_Key"
     
     genai.configure(api_key=api_key)
-    # Using gemini-1.5-flash for speed and cost efficiency if available, falling back to gemini-pro
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    # Using gemini-2.5-flash for speed and cost efficiency
+    model = genai.GenerativeModel('gemini-2.5-flash')
 
     # Construct the prompt
     prompt = """
@@ -35,6 +62,8 @@ def generate_script(news_by_category: Dict[str, List[Dict]], mode: str = "daily"
     - Smoothly transition between categories.
     
     **Context:**
+    - The podcast is named "Meet the Clankers" because the HOSTS (Zeta and Quill) are the "Clankers".
+    - Do NOT refer to the audience as "Clankers". Refer to them as "listeners", "humans", "folks", or "meatbags" (if Quill is speaking).
     """
     
     if mode == "weekly":
@@ -75,12 +104,18 @@ def generate_script(news_by_category: Dict[str, List[Dict]], mode: str = "daily"
             text = text[:-3]
             
         script = json.loads(text)
-        return script
+        
+        # Generate title
+        print("🎯 Generating episode title...")
+        title = generate_title(script, model)
+        print(f"📌 Episode title: {title}")
+        
+        return script, title
     except Exception as e:
         print(f"❌ Error generating script: {e}")
         # Fallback/Debug: Print raw text if JSON fails
         # print(f"Raw response: {text}") 
-        return []
+        return [], "Error_Episode"
 
 if __name__ == "__main__":
     # Test stub

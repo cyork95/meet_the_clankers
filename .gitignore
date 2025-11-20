@@ -1,5 +1,6 @@
 # Ignore environment variables
 .env
+sa
 
 # Ignore Python environment
 __pycache__
@@ -11,3 +12,4 @@ __pycache__
 *.wav
 temp_audio/
 output/
+outputs/

@@ -35,31 +35,36 @@ def main():
         return
 
     # 2. Generate Script
-    script = generate_script(news, mode=args.mode, holiday_theme=args.holiday)
+    result = generate_script(news, mode=args.mode, holiday_theme=args.holiday)
     
-    if not script:
+    if not result or not result[0]:
         print("❌ Script generation failed. Exiting.")
         return
-        
-    # Save script for debug
-    with open("latest_script.json", "w") as f:
+    
+    script, title = result
+    
+    # Save script with title and date
+    script_dir = "outputs/scripts"
+    if not os.path.exists(script_dir):
+        os.makedirs(script_dir)
+    
+    date_str = datetime.now().strftime('%Y%m%d')
+    script_filename = os.path.join(script_dir, f"{title}_{date_str}.json")
+    
+    with open(script_filename, "w") as f:
         import json
         json.dump(script, f, indent=2)
-    print("📝 Script saved to latest_script.json")
+    print(f"📝 Script saved to {script_filename}")
 
     # 3. Generate Audio
-    audio_files = asyncio.run(generate_audio_files(script))
+    audio_files = asyncio.run(generate_audio_files(script, output_dir="outputs/temp_audio"))
     
     if not audio_files:
         print("❌ Audio generation failed. Exiting.")
         return
 
     # 4. Assemble Podcast
-    output_dir = "output"
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-
-    output_filename = os.path.join(output_dir, f"meet_the_clankers_{args.mode}_{datetime.now().strftime('%Y%m%d')}.mp3")
+    output_filename = os.path.join("outputs", f"{title}_{date_str}.mp3")
     assemble_podcast(audio_files, output_file=output_filename)
 
 if __name__ == "__main__":
