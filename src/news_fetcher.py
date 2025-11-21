@@ -2,7 +2,9 @@
 Module for fetching news from RSS feeds.
 """
 import time
-from datetime import datetime, timedelta
+import re
+from datetime import datetime, timedelta, timezone
+from time import mktime
 from typing import Dict, List
 import feedparser
 
@@ -11,95 +13,113 @@ RSS_FEEDS = {
     "ai": [
         "https://techcrunch.com/category/artificial-intelligence/feed/",
         "https://www.wired.com/feed/category/ai/latest/rss",
-        "https://www.theverge.com/rss/ai/index.xml"
+        "https://www.theverge.com/rss/ai/index.xml",
+        "https://www.artificialintelligence-news.com/feed/"
     ],
     "tech": [
         "https://techcrunch.com/feed/",
         "https://www.theverge.com/rss/index.xml",
-        "http://feeds.arstechnica.com/arstechnica/index"
+        "http://feeds.arstechnica.com/arstechnica/index",
+        "https://www.engadget.com/rss.xml"
     ],
     "politics": [
         "https://feeds.bbci.co.uk/news/world/rss.xml",
-        "https://feeds.npr.org/1004/rss.xml"
+        "https://feeds.npr.org/1004/rss.xml",
+        "https://www.politico.com/rss/politics08.xml"
     ],
     "business": [
         "https://www.cnbc.com/id/10001147/device/rss/rss.html",
-        "https://feeds.bloomberg.com/technology/news.xml"
+        "https://feeds.bloomberg.com/technology/news.xml",
+        "https://feeds.reuters.com/reuters/businessNews"
     ],
     "entertainment": [
         "https://www.polygon.com/rss/index.xml",
-        "https://www.ign.com/rss/articles.xml"
+        "https://www.ign.com/rss/articles.xml",
+        "https://www.hollywoodreporter.com/feed/"
     ],
     "science": [
         "https://www.sciencedaily.com/rss/top_news.xml",
-        "http://feeds.nature.com/nature/rss/current"
+        "http://feeds.nature.com/nature/rss/current",
+        "https://www.newscientist.com/feed/home"
+    ],
+    "gaming": [
+        "https://www.polygon.com/rss/index.xml",
+        "https://www.ign.com/rss/articles.xml",
+        "https://www.gamespot.com/feeds/news/"
+    ],
+    "space": [
+        "https://www.nasa.gov/rss/dyn/breaking_news.rss",
+        "https://www.space.com/feeds/all"
     ]
 }
 
-def parse_date(entry):
-    """Attempt to parse the date from an RSS entry."""
-    try:
-        if hasattr(entry, 'published_parsed') and entry.published_parsed:
-            return datetime.fromtimestamp(time.mktime(entry.published_parsed))
-        if hasattr(entry, 'updated_parsed') and entry.updated_parsed:
-            return datetime.fromtimestamp(time.mktime(entry.updated_parsed))
-    except Exception:
-        pass
-    return datetime.now()
-
-def fetch_news(time_window: str = "24h", categories: List[str] = ["tech"]) -> Dict[str, List[Dict]]:
+def fetch_news(time_window: str = "24h", categories: List[str] = None) -> Dict[str, List[Dict]]:
     """
-    Fetch news from RSS feeds for the given categories and time window.
+    Fetch news from RSS feeds based on time window and categories.
     """
-    news_data = {}
-    
+    if categories is None:
+        categories = ["ai", "tech", "business", "science"]
+        
     # Calculate cutoff time
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
     if time_window == "24h":
         cutoff = now - timedelta(hours=24)
     elif time_window == "7d":
         cutoff = now - timedelta(days=7)
     else:
-        cutoff = now - timedelta(hours=24) # Default
+        cutoff = now - timedelta(hours=24)
         
-    print(f"📰 Fetching news since {cutoff.strftime('%Y-%m-%d %H:%M')}...")
-
+    print(f"[INFO] Fetching news since {cutoff.strftime('%Y-%m-%d %H:%M')}...")
+    
+    all_news = {}
+    
     for category in categories:
         if category not in RSS_FEEDS:
-            print(f"⚠️ Category '{category}' not found. Skipping.")
+            print(f"[WARN] Category '{category}' not found. Skipping.")
             continue
             
-        print(f"  🔍 Checking {category} sources...")
+        print(f"\n[INFO] Checking {category.upper()} feeds...")
         category_news = []
         
-        for url in RSS_FEEDS[category]:
+        for feed_url in RSS_FEEDS[category]:
             try:
-                feed = feedparser.parse(url)
+                feed = feedparser.parse(feed_url)
+                print(f"  - Parsing {feed.feed.get('title', feed_url)}...")
+                
                 for entry in feed.entries:
-                    pub_date = parse_date(entry)
-                    if pub_date > cutoff:
+                    # Parse publication date
+                    published_time = None
+                    if hasattr(entry, 'published_parsed') and entry.published_parsed:
+                        published_time = datetime.fromtimestamp(mktime(entry.published_parsed), timezone.utc)
+                    elif hasattr(entry, 'updated_parsed') and entry.updated_parsed:
+                        published_time = datetime.fromtimestamp(mktime(entry.updated_parsed), timezone.utc)
+                        
+                    if published_time and published_time > cutoff:
+                        # Clean up summary (remove HTML tags)
+                        summary = entry.get('summary', '')
+                        summary = re.sub('<[^<]+?>', '', summary) # Simple HTML stripper
+                        
                         category_news.append({
-                            "title": entry.title,
-                            "link": entry.link,
-                            "summary": getattr(entry, 'summary', ''),
-                            "published": pub_date.strftime("%Y-%m-%d %H:%M"),
-                            "source": feed.feed.title if hasattr(feed, 'feed') and hasattr(feed.feed, 'title') else url
+                            'title': entry.title,
+                            'link': entry.link,
+                            'summary': summary[:500] + "..." if len(summary) > 500 else summary,
+                            'source': feed.feed.get('title', 'Unknown Source'),
+                            'published': published_time.strftime('%Y-%m-%d %H:%M')
                         })
             except Exception as e:
-                print(f"    ❌ Error fetching {url}: {e}")
+                print(f"[ERROR] Failed to parse {feed_url}: {e}")
                 
         # Sort by date (newest first) and limit
         category_news.sort(key=lambda x: x['published'], reverse=True)
+        all_news[category] = category_news[:5] # Top 5 per category
+        print(f"  [SUCCESS] Found {len(category_news)} recent items for {category}.")
         
-        # Limit logic: 5 for daily, 10 for weekly
-        limit = 5 if time_window == "24h" else 10
-        news_data[category] = category_news[:limit]
-        print(f"    ✅ Found {len(news_data[category])} stories for {category}.")
-        
-    return news_data
+    total_items = sum(len(items) for items in all_news.values())
+    print(f"\n[SUCCESS] Total news items fetched: {total_items}")
+    return all_news
 
 if __name__ == "__main__":
     # Test run
     news = fetch_news(categories=["ai", "tech"])
     import json
-    print(json.dumps(news, indent=2))
+    print(json.dumps(news, indent=2, default=str))

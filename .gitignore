@@ -6,6 +6,7 @@ sa
 __pycache__
 .pytest_cache
 .venv
+.vscode
 
 # Ignore audio files
 *.mp3
@@ -13,3 +14,4 @@ __pycache__
 temp_audio/
 output/
 outputs/
+archive/

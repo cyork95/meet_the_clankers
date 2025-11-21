@@ -6,20 +6,26 @@ import os
 import subprocess
 from typing import List, Dict
 from google.cloud import texttospeech
+from dotenv import load_dotenv
 
-# Voice Configuration - Using Google Cloud WaveNet voices
+# Load environment variables from .env file
+load_dotenv()
+
+# Voice Configuration - Using Google Cloud WaveNet voices (most natural)
 VOICES = {
     "Zeta": {
         "language_code": "en-US",
-        "name": "en-US-Neural2-F",  # High-quality female voice
-        "pitch": 2.0,  # Slightly higher pitch for energetic feel
-        "speaking_rate": 1.1  # Slightly faster for enthusiasm
+        "name": "en-US-Wavenet-F",  # WaveNet female voice (most natural)
+        "pitch": 2.5,  # Moderate-high pitch for energetic feel
+        "speaking_rate": 1.08,  # Slightly faster for enthusiasm
+        "effects_profile": ["headphone-class-device"]  # Optimize for headphones
     },
     "Quill": {
         "language_code": "en-US",
-        "name": "en-US-Neural2-D",  # High-quality male voice
-        "pitch": -2.0,  # Slightly lower pitch for gravitas
-        "speaking_rate": 0.95  # Slightly slower for measured delivery
+        "name": "en-US-Wavenet-D",  # WaveNet male voice (most natural)
+        "pitch": -2.0,  # Moderate lower pitch for distinction
+        "speaking_rate": 0.95,  # Slightly slower for measured delivery
+        "effects_profile": ["headphone-class-device"]  # Optimize for headphones
     }
 }
 
@@ -51,7 +57,8 @@ async def generate_audio_for_line(text: str, speaker: str, index: int, output_di
             audio_config = texttospeech.AudioConfig(
                 audio_encoding=texttospeech.AudioEncoding.MP3,
                 pitch=voice_config["pitch"],
-                speaking_rate=voice_config["speaking_rate"]
+                speaking_rate=voice_config["speaking_rate"],
+                effects_profile_id=voice_config.get("effects_profile", [])
             )
             
             # Perform the text-to-speech request
@@ -68,7 +75,7 @@ async def generate_audio_for_line(text: str, speaker: str, index: int, output_di
         await asyncio.to_thread(run_google_tts)
         
     except Exception as e:
-        print(f"⚠️ Google Cloud TTS failed for line {index}: {e}. Falling back to gTTS.")
+        print(f"[WARN] Google Cloud TTS failed for line {index}: {e}. Falling back to gTTS.")
         try:
             from gtts import gTTS
             # Run gTTS in a separate thread to avoid blocking the event loop
@@ -78,7 +85,7 @@ async def generate_audio_for_line(text: str, speaker: str, index: int, output_di
             
             await asyncio.to_thread(run_gtts)
         except Exception as gtts_e:
-            print(f"❌ gTTS also failed: {gtts_e}")
+            print(f"[ERROR] gTTS also failed: {gtts_e}")
             return ""
 
     return output_file
@@ -90,7 +97,7 @@ async def generate_audio_files(script: List[Dict[str, str]], output_dir: str = "
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
         
-    print(f"🔊 Generating audio for {len(script)} lines...")
+    print(f"[INFO] Generating audio for {len(script)} lines...")
     audio_files = []
     
     tasks = []
@@ -106,7 +113,7 @@ async def generate_audio_files(script: List[Dict[str, str]], output_dir: str = "
     # Sort to ensure correct order based on index
     audio_files.sort()
     
-    print(f"✅ Generated {len(audio_files)} audio clips.")
+    print(f"[SUCCESS] Generated {len(audio_files)} audio clips.")
     return list(audio_files)
 
 def combine_audio_files(audio_files: List[str], output_file: str) -> str:
@@ -114,7 +121,7 @@ def combine_audio_files(audio_files: List[str], output_file: str) -> str:
     Combine multiple audio files into a single file using ffmpeg.
     """
     if not audio_files:
-        print("❌ No audio files to combine.")
+        print("[ERROR] No audio files to combine.")
         return ""
 
     # Create a temporary file list for ffmpeg
@@ -126,7 +133,7 @@ def combine_audio_files(audio_files: List[str], output_file: str) -> str:
             abs_path = os.path.abspath(audio_file).replace("\\", "/")
             f.write(f"file '{abs_path}'\n")
 
-    print(f"🔗 Combining {len(audio_files)} files into {output_file}...")
+    print(f"[INFO] Combining {len(audio_files)} files into {output_file}...")
     
     try:
         # Run ffmpeg command
@@ -146,17 +153,17 @@ def combine_audio_files(audio_files: List[str], output_file: str) -> str:
         ]
         
         subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        print(f"✅ Podcast generated successfully: {output_file}")
+        print(f"[SUCCESS] Podcast generated successfully: {output_file}")
         
         # Clean up list file
         os.remove(list_file_path)
         return output_file
         
     except subprocess.CalledProcessError as e:
-        print(f"❌ Error running ffmpeg: {e}")
+        print(f"[ERROR] Error running ffmpeg: {e}")
         return ""
     except FileNotFoundError:
-        print("❌ ffmpeg not found. Please ensure ffmpeg is installed and in your PATH.")
+        print("[ERROR] ffmpeg not found. Please ensure ffmpeg is installed and in your PATH.")
         return ""
 
 if __name__ == "__main__":

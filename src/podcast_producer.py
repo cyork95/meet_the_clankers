@@ -22,7 +22,7 @@ def assemble_podcast(audio_files: List[str], output_file: str = "meet_the_clanke
     """
     Stitch together audio files into a single podcast episode using FFmpeg concat demuxer.
     """
-    print(f"🎧 Assembling podcast from {len(audio_files)} clips...")
+    print(f"[INFO] Assembling podcast from {len(audio_files)} clips...")
     
     # Create a temporary file list for FFmpeg
     list_file = "concat_list.txt"
@@ -49,18 +49,18 @@ def assemble_podcast(audio_files: List[str], output_file: str = "meet_the_clanke
             output_file
         ]
         
-        print("🔨 Running FFmpeg...")
+        print("[INFO] Running FFmpeg...")
         subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         
-        print("✅ Podcast saved successfully!")
+        print("[SUCCESS] Podcast saved successfully!")
         return output_file
         
     except subprocess.CalledProcessError as e:
-        print(f"❌ FFmpeg failed: {e}")
+        print(f"[ERROR] FFmpeg failed: {e}")
         print("👉 Ensure FFmpeg is installed and in your PATH.")
         return None
     except Exception as e:
-        print(f"❌ Error assembling podcast: {e}")
+        print(f"[ERROR] Error assembling podcast: {e}")
         return None
     finally:
         # Cleanup

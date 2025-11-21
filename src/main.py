@@ -15,7 +15,7 @@ def main():
     parser = argparse.ArgumentParser(description="Meet the Clankers - AI Podcast Generator")
     parser.add_argument("--mode", choices=["daily", "weekly"], default="daily", help="Podcast mode: daily or weekly")
     parser.add_argument("--holiday", type=str, help="Optional holiday theme (e.g., 'Christmas')")
-    parser.add_argument("--categories", type=str, default="ai,tech,politics", help="Comma-separated list of categories")
+    parser.add_argument("--categories", type=str, default="ai,tech,business,science", help="Comma-separated list of categories (ai, tech, business, science, entertainment, politics)")
     
     args = parser.parse_args()
     
