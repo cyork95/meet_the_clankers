@@ -42,33 +42,28 @@ def generate_tweets(script_content: List[Dict[str, str]], episode_title: str, mo
     - **Quill**: Sarcastic, cynical, realist AI.
     
     **Task:**
-    Generate 3 different tweets to promote the latest episode titled "{episode_title}".
+    Generate ONE engaging tweet to promote the latest episode titled "{episode_title}".
     
-    **Tweet Styles:**
-    1. **The Hook**: A catchy summary of the most interesting topic discussed.
-    2. **The Quote**: A funny or insightful exchange between Zeta and Quill (paraphrased if needed).
-    3. **The Quill Special**: A sarcastic, dry take on the news from Quill's perspective.
+    **Tweet Style:**
+    - A mix of a catchy hook and a sarcastic comment from Quill.
     
     **Requirements:**
     - MUST include the link: {spotify_link}
     - MUST be under 280 characters.
     - Use relevant hashtags like #AI #TechNews #Podcast #MeetTheClankers.
     - Be engaging and sound like a human (or a very clever AI) wrote it.
-    - Do NOT include "Tweet 1:", "Tweet 2:" labels in the output. Just separate them with "---".
+    - RETURN ONLY THE TWEET TEXT. No "Tweet:" prefix.
     
     **Episode Context:**
     {context}
     """
     
     try:
-        print("[INFO] Generating tweets with Gemini...")
+        print("[INFO] Generating tweet with Gemini...")
         response = model.generate_content(prompt)
         text = response.text.strip()
         
-        # Split by separator
-        tweets = [t.strip() for t in text.split("---") if t.strip()]
-        
-        return tweets
+        return [text]
         
     except Exception as e:
         print(f"[ERROR] Error generating tweets: {e}")

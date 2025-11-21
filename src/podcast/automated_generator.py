@@ -9,14 +9,15 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 # Add src to path
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+# Add root to path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-from src.news_fetcher import fetch_news
-from src.script_generator import generate_script
-from src.audio_generator import generate_audio_files
-from src.podcast_producer import assemble_podcast
-from src.tweet_generator import generate_tweets
-from src.twitter_poster import post_tweets
+from src.podcast.news_fetcher import fetch_news
+from src.podcast.script_generator import generate_script
+from src.podcast.audio_generator import generate_audio_files
+from src.podcast.podcast_producer import assemble_podcast
+from src.podcast.tweet_generator import generate_tweets
+from src.podcast.twitter_poster import post_tweets
 
 load_dotenv()
 
@@ -54,7 +55,8 @@ async def generate_daily_episode(categories=None, mode="daily", holiday_theme=No
     print(f"[INFO] Episode title: {title}")
     
     # 3. Save Script
-    script_dir = "outputs/scripts"
+    # 3. Save Script
+    script_dir = "outputs/podcast_scripts"
     os.makedirs(script_dir, exist_ok=True)
     
     date_str = datetime.now().strftime('%Y%m%d')
@@ -99,7 +101,9 @@ async def generate_daily_episode(categories=None, mode="daily", holiday_theme=No
     
     # 5. Assemble Podcast
     print("\n[INFO] Assembling podcast...")
-    output_filename = os.path.join("outputs", f"{title}_{date_str}.mp3")
+    output_dir = "outputs/podcast_episodes"
+    os.makedirs(output_dir, exist_ok=True)
+    output_filename = os.path.join(output_dir, f"{title}_{date_str}.mp3")
     result = assemble_podcast(audio_files, output_file=output_filename)
     
     if result:

@@ -8,10 +8,11 @@ import sys
 import os
 
 # Add parent directory to path
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+# Add root to path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-from src.audio_generator import generate_audio_files
-from src.podcast_producer import assemble_podcast
+from src.podcast.audio_generator import generate_audio_files
+from src.podcast.podcast_producer import assemble_podcast
 
 INTRODUCTION_SCRIPT = [
     {

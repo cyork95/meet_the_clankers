@@ -1,47 +1,54 @@
-# Meet the Clankers - Walkthrough
+# Walkthrough - Clanker's Night Shift & Project Reorganization
 
-I have successfully implemented the "Meet the Clankers" AI Podcast Generator. This system fetches daily news, generates a witty script between two AI hosts (Zeta and Quill), converts it to audio using distinct voices, and assembles a final podcast episode.
+I have successfully integrated the new "Horror Show" mode and reorganized the project structure to support multiple content types.
 
-## Features Implemented
-- **News Fetching**: Fetches latest headlines from RSS feeds (Tech, AI, Politics, etc.).
-- **Script Generation**: Uses Google Gemini API to generate banter-heavy scripts.
-- **Audio Generation**: Uses EdgeTTS for high-quality neural voices (Zeta=Female, Quill=Male).
-- **Podcast Assembly**: Stitches clips together with silence using Pydub.
-- **Modes**: Supports Daily (`--mode daily`) and Weekly (`--mode weekly`) episodes.
-- **Quality Assurance**: Includes unit tests and linting.
+## 1. Project Reorganization
 
-## Verification Results
+The `src/` directory has been restructured to separate the Podcast logic from the new Horror logic:
 
-### Automated Tests
-I ran the unit tests using `pytest` and they passed successfully.
+- **`src/podcast/`**: Contains all logic for "Meet the Clankers" news podcast (script, audio, tweets).
+- **`src/horror/`**: Contains the new logic for "Clanker's Night Shift".
+- **`src/shared/`**: Reserved for common utilities.
+- **`src/main.py`**: The new unified entry point for the application.
 
-```bash
-$ python -m pytest
-============================= test session starts =============================
-collected 3 items
+## 2. Clanker's Night Shift (Horror Show)
 
-tests\test_news_fetcher.py ..                                            [ 66%]
-tests\test_script_generator.py .                                         [100%]
+The new horror mode generates a short, atmospheric horror story with narration, visuals, and video effects.
 
-============================= 3 passed in 27.65s ==============================
-```
+### Components
+- **Script**: Uses Gemini to generate a chilling story based on a prompt.
+- **Audio**: Uses **Google Cloud TTS** (`en-US-Studio-M`) with pitch lowering (-5.0) and slow rate (0.85) for a deep, scary voice.
+- **Visuals**: Uses **Hugging Face Inference API** (FLUX.1-dev or Stable Diffusion XL) to generate a high-definition horror image.
+- **Video**: Uses **MoviePy** to combine the audio and image with a "Ken Burns" slow zoom effect.
 
-### Linting
-I ran `pylint` to ensure code quality. The score has been improved by fixing import orders, docstrings, and unused variables.
-
-### Manual Verification Steps
-To generate a podcast, run the following command:
+### Usage
+Run the horror show generator via the command line:
 
 ```bash
-python main.py --mode daily --categories "ai,tech"
+python src/main.py horror --prompt "The sound of scratching behind the wallpaper"
 ```
 
-This will:
-1. Fetch news for AI and Tech.
-2. Generate a script (saved to `latest_script.json`).
-3. Generate audio clips (in `temp_audio/`).
-4. Export the final MP3 (e.g., `meet_the_clankers_daily_20251120.mp3`).
+The output video will be saved to `outputs/horror_episodes/`.
 
-## Next Steps
-- **Add Music**: Integrate intro/outro music mixing.
-- **Deploy**: Set up a GitHub Action to run this daily and upload to a podcast host.
+## 3. Podcast Updates
+
+- **Single Tweet**: The tweet generator now produces a single, high-quality promotional tweet instead of three options.
+- **Usage**:
+  ```bash
+  python src/main.py podcast --mode daily
+  ```
+
+## 4. Requirements
+
+Ensure you have the updated dependencies installed:
+
+```bash
+pip install -r requirements.txt
+```
+
+## 5. Configuration
+
+Ensure your `.env` file has the following keys:
+- `GEMINI_API_KEY`: For script generation.
+- `GOOGLE_APPLICATION_CREDENTIALS`: JSON file path for Google Cloud TTS.
+- `HF_TOKEN`: Hugging Face token for image generation (Get one free at huggingface.co).

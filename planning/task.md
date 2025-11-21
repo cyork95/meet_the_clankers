@@ -1,28 +1,26 @@
-# Tasks
+# Task: Integrate "Clanker's Night Shift" Horror Show
 
-- [x] Planning and Setup <!-- id: 0 -->
-    - [x] Create implementation plan <!-- id: 1 -->
-    - [x] Set up project structure (Python environment, dependencies) <!-- id: 2 -->
-- [x] News Fetching Module <!-- id: 3 -->
-    - [x] Implement news fetcher (RSS) <!-- id: 4 -->
-    - [x] Filter and summarize content <!-- id: 5 -->
-- [x] Script Generation Module <!-- id: 6 -->
-    - [x] Create prompts for Zeta and Quill <!-- id: 7 -->
-    - [x] Implement script generation logic <!-- id: 8 -->
-- [x] Audio Generation Module <!-- id: 9 -->
-    - [x] Implement TTS (EdgeTTS) <!-- id: 10 -->
-    - [x] Generate audio files <!-- id: 11 -->
-- [x] Podcast Assembly <!-- id: 12 -->
-    - [x] Stitch audio segments <!-- id: 13 -->
-    - [x] Add background music/intro/outro <!-- id: 14 -->
-- [x] Quality Assurance <!-- id: 15 -->
-    - [x] Add linting (pylint) <!-- id: 16 -->
-    - [x] Add testing (pytest) <!-- id: 17 -->
-    - [x] Write unit tests for existing modules <!-- id: 18 -->
-- [x] Verification <!-- id: 19 -->
-    - [x] Run full pipeline test <!-- id: 20 -->
-- [ ] Refactoring and Documentation <!-- id: 21 -->
-    - [x] Merge task lists <!-- id: 22 -->
-    - [ ] Create docs folder and move documentation <!-- id: 23 -->
-    - [ ] Create development guide (pylint command) <!-- id: 24 -->
-    - [ ] Create src folder and move code <!-- id: 25 -->
+- [x] Explore existing codebase structure <!-- id: 0 -->
+- [x] Create Implementation Plan for reorganization and new features <!-- id: 1 -->
+- [x] Reorganize project structure to support multiple content types (Podcast vs Horror Show) <!-- id: 2 -->
+    - [x] Move existing podcast logic to `src/podcast/` or similar <!-- id: 3 -->
+    - [x] Create shared utilities (TTS, etc.) <!-- id: 4 -->
+- [x] Update Tweet Generator to single tweet <!-- id: 11 -->
+- [x] Implement Horror Script Generator <!-- id: 5 -->
+- [x] Refactor Horror Audio to use Google Cloud TTS <!-- id: 12 -->
+- [x] Refactor Image Generator to use Hugging Face API <!-- id: 13 -->
+- [x] Implement Video Assembler (MoviePy) <!-- id: 8 -->
+- [x] Create main entry point for Horror Show <!-- id: 9 -->
+- [x] Update Output Directory Structure <!-- id: 14 -->
+    - [x] Podcast: `outputs/podcast_scripts`, `outputs/podcast_episodes` <!-- id: 15 -->
+    - [x] Horror: `outputs/horror_scripts`, `outputs/horror_episodes` <!-- id: 16 -->
+- [x] Verify and Test <!-- id: 10 -->
+- [x] Automate Horror Prompt Generation <!-- id: 17 -->
+- [x] Create Project README <!-- id: 18 -->
+- [x] Create Horror Host Persona (Grimm) <!-- id: 19 -->
+- [x] Generate YouTube Channel Setup Details <!-- id: 20 -->
+- [x] Create Channel Intro Video Generator (Crossover) <!-- id: 21 -->
+- [x] Refine Intro Video (No Narrator, Clean Text) <!-- id: 22 -->
+- [x] Add Visual Effects (Zoom, Static, Flicker) <!-- id: 23 -->
+- [x] Add Horror Duration Controls (Short/Medium/Long) <!-- id: 24 -->
+- [x] Automate Subtitle Text Generation <!-- id: 25 -->
